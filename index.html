@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mayorista de Bebidas</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('https://images.unsplash.com/photo-1541976076758-25b4d3c58e5d') no-repeat center center/cover;
+      color: white; 
+      min-height: 100vh;
+    }
+
+    header {
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 10px 0;
+      font-size: 2em;
+      color: gold;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 1.1em;
+    }
+
+    .container {
+      padding: 20px;
+      background: rgba(0,0,0,0.6);
+    }
+
+    h2 {
+      color: gold;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+      margin: auto;
+      margin-bottom: 30px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      padding: 12px;
+      background: gold;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: darkorange;
+    }
+
+    .productos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .precio {
+      margin: 10px 0;
+      font-size: 1.1em;
+      color: gold;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mayorista de Bebidas</h1>
+    <p>Cervezas · Vinos · Rones · Tequilas · Singani</p>
+  </header>
+
+  <div class="container">
+    <h2>Registro de Cliente</h2>
+    <form id="registroForm">
+      <input type="text" id="nombre" placeholder="Nombre completo" required>
+      <input type="number" id="edad" placeholder="Edad" required>
+      <input type="tel" id="celular" placeholder="Celular" required>
+      <input type="email" id="correo" placeholder="Correo electrónico" required>
+      <button type="submit">Registrarme y Enviar por WhatsApp</button>
+    </form>
+
+    <div id="productosContainer" style="display:none;">
+      <h2>Inventario de Productos</h2>
+      <div class="productos"></div>
+    </div>
+  </div>
+
+  <script>
+    const numeroWhatsApp = "59163852867"; // Tu número de WhatsApp
+    const sheetID = "TU_ID_DE_HOJA"; // 👈 Reemplaza esto con tu ID de hoja de Google Sheets
+
+    // Registro de cliente y envío por WhatsApp
+    document.getElementById("registroForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      let nombre = document.getElementById("nombre").value;
+      let edad = document.getElementById("edad").value;
+      let celular = document.getElementById("celular").value;
+      let correo = document.getElementById("correo").value;
+
+      let mensaje = `👋 Hola, me registro como cliente.
+📝 Nombre: ${nombre}
+🎂 Edad: ${edad}
+📱 Celular: ${celular}
+📧 Correo: ${correo}`;
+
+      let url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, "_blank");
+
+      // Mostrar productos después de enviar el mensaje
+      document.getElementById("productosContainer").style.display = "block";
+      cargarInventario();
+    });
+
+    // Cargar inventario desde Google Sheets
+    function cargarInventario() {
+      const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+
+      fetch(url)
+        .then(res => res.text())
+        .then(data => {
+          const json = JSON.parse(data.substr(47).slice(0, -2));
+          let rows = json.table.rows;
+          let contenedor = document.querySelector(".productos");
+          contenedor.innerHTML = ""; // Limpiar antes de mostrar
+
+          rows.forEach(r => {
+            let producto = r.c[0] ? r.c[0].v : "";
+            let precioU = r.c[1] ? r.c[1].v : "";
+            let precioCaja = r.c[2] ? r.c[2].v : "";
+            let imagen = r.c[3] ? r.c[3].v : "";
+
+            let card = `
+              <div class="card">
+                <img src="${imagen}" alt="${producto}">
+                <h3>${producto}</h3>
+                <p class="precio">Unitario: $${precioU} <br> Caja: $${precioCaja}</p>
+                <button onclick="pedirWhatsApp('${producto}')">Pedir por WhatsApp</button>
+              </div>
+            `;
+            contenedor.innerHTML += card;
+          });
+        });
+    }
+
+    // Pedir por WhatsApp desde el inventario
+    function pedirWhatsApp(producto) {
+      let mensaje = `Hola 👋, quiero más información sobre el producto: ${producto}`;
+      let url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, "_blank");
+    }
+  </script>
+</body>
+</html>
