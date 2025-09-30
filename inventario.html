@@ -1,0 +1,35 @@
+<script>
+const datos = [
+["PACEÑA 440","11.00"],["PACEÑA 330","10.00"],["PACEÑA 269","9.00"],["QUILMES","10.00"],["HUARI","10.00"],["TAQUIÑA","9.00"],["CRISTAL","9.00"],["REAL","8.00"],["CASA REAL NEGRO","75.00"],["TERRUÑO","16.00"],["PACEÑA 269","5.00"],["GOLDEN 440","10.00"],["GOLDEN 269","8.00"],["GOLDEN 650","15.00"],["CHICHA 440","9.00"],["CHICHA 330","9.00"],["AUTENTICA 440","9.00"],["AUTENTICA 330","9.00"],["QUILMES 473","5.00"],["CONTI ROJO","10.00"],["CONTI AZUL","10.00"],["AMSTER 473","10.00"],["AMSTER 269","9.00"],["MALTA 330","8.00"],["MALTIN 473","7.00"],["BLU 473","7.00"],["BLU 1 LITRO","15.00"],["BLU 650","27.00"],["SNAIDERR 473","23.00"],["SNAIDER 269","9.00"],["ZAMBA 269","6.00"],["CONTI 269","5.00"],["CONTI ROJO 330","5.00"],["CORONA 450","5.00"],["CORONA 330","5.00"],["CHICHA 269","13.00"],["BALTICA 473","8.00"],["BALTICA 330","7.00"],["SNAIDER 269","10.00"],["ZAMBA 269","7.00"],["CONTI 269","8.00"],["CONTI ROJO 330","8.00"],["CORONA 450","8.00"],["CORONA 330","7.00"],["CHICHA 269","15.00"],["BALTICA 473","9.00"],["BALTICA 330","7.00"],["BLU 2 LITRO","10.00"],["CUSQUEÑA","7.00"]
+];
+
+
+const pedido = [];
+const tbody = document.querySelector('#inventario tbody');
+const listaPedido = document.getElementById('pedidoLista');
+const totalPedido = document.getElementById('totalPedido');
+
+
+function renderTabla(filtroText=''){
+tbody.innerHTML='';
+const q = filtroText.trim().toLowerCase();
+datos.forEach((row, idx)=>{
+const nombre = row[0];
+const precio = parseFloat(row[1]).toFixed(2);
+if(q && !nombre.toLowerCase().includes(q)) return;
+const tr = document.createElement('tr');
+tr.innerHTML = `
+<td>${escapeHtml(nombre)}</td>
+<td class="right">${precio}</td>
+<td class="small">#${(idx+1).toString().padStart(3,'0')}</td>
+<td class="right"><input type='number' min='1' value='1' style='width:60px'></td>
+<td class="right"><button data-idx='${idx}'>Añadir</button></td>
+`;
+tbody.appendChild(tr);
+});
+tbody.querySelectorAll('button').forEach(btn=>{
+btn.addEventListener('click', ()=>{
+const i = btn.dataset.idx;
+const fila = btn.closest('tr');
+const cant = parseInt(fila.querySelector('input').value);
+if(cant>0){
